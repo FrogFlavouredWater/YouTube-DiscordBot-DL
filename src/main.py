@@ -85,7 +85,7 @@ def soft_clear_terminal():
         print("\033[H", end="")  # Unix-like fallback   
 
 def logtest():
-    print("Testing logging... \n\n")
+    logger.info("Testing logging...\n")
 
     logger.debug('debug message')
     time.sleep(0.5)
@@ -104,8 +104,8 @@ def logtest():
     
     time.sleep(0.3)
 
-    print("\n\nTesting logging complete.")
-    print("========================================\n\n")
+    logger.info("Testing logging complete.")
+    logger.info("========================================")
 
      # Pause for 2 seconds
     time.sleep(2)
