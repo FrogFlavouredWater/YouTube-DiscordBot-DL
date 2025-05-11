@@ -26,8 +26,9 @@ audiofiles = []
 audiofolders = []
 for dirpath, dirnames, filenames in os.walk("data/jukebox"):
     audiofolders += dirnames
+    folder = dirpath.replace('\\','/')[13:]
     for f in filenames:
-        audiofiles.append(f"{dirpath.replace('\\','/')[13:]}/{f}".strip('/')) # Trim off the base path
+        audiofiles.append(f"{folder}/{f}".strip('/')) # Trim off the base path
 
 # Sort the jukebox file list for consistent ordering
 audiofiles.sort()
