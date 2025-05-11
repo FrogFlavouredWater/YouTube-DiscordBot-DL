@@ -15,7 +15,7 @@ from core import utils
 from pathlib import Path
 
 # Colorama initialization
-init()
+init(strip=False, convert=False)
 
 # Create logger
 loggerName = Path(__file__).stem
