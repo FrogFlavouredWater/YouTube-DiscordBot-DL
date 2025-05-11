@@ -48,15 +48,19 @@ class ColorFormatter(logging.Formatter):
     def format(self, record):
         message_only = getattr(record, "no_level", False)
 
+        # Always end with \r\n to force proper new line and cursor reset
+        suffix = "\r\n"
+
         if message_only:
-            return record.getMessage().rstrip() + "\n"  # enforce newline
+            return record.getMessage().rstrip() + suffix
 
         level_color = self.COLORS.get(record.levelno, Fore.WHITE)
         levelname = level_color + record.levelname + Style.RESET_ALL
         record.levelname = levelname
 
         base_message = super().format(record)
-        return base_message.rstrip() + "\n"  # enforce newline
+        return base_message.rstrip() + suffix
+
 
 
 logFormatter = ColorFormatter("[%(levelname)s] :: %(message)s")
@@ -138,8 +142,9 @@ musichandler = MusicCommands(tree, guilds, downloader)
 
 @client.event
 async def on_ready():
-    print("========================================")
-    print("Starting up...")
+    logger.info("========================================")
+    logger.info("Starting up...")
+
     time.sleep(0.5)
     soft_clear_terminal()
     
