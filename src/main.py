@@ -143,7 +143,7 @@ async def on_ready():
 
     await tree.sync(guild=guilds[0])
     log_ok(f"Slash commands synced to {GUILD_ID}")
-    
+    log_failed("Ban Scienceboy from the server :(")
     log_ok("Server is ready.")
 
 
