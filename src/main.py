@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import shutil
 import discord
 from colorama import *
 import logging
@@ -84,16 +85,20 @@ def logtest():
     print("\n\nTesting logging complete.")
     print("========================================\n\n")
 
-    log_ok("Logging test succeeded.")
-
-    # Pause for 2 seconds
+     # Pause for 2 seconds
     time.sleep(2)
+    
+    # Soft-clear screen by printing enough lines to fill the visible terminal
+    height, _ = shutil.get_terminal_size((80, 24))  # fallback size
+    print("\n" * height)
 
-    # Scroll down by printing newlines to push content up
-    print("\n" * 50)
-
-    # Move cursor to top-left (optional: if you want to print new content immediately at top)
-    print("\033[H", end="")
+    # Now reset the cursor to top-left safely (Windows-compatible)
+    if os.name == 'nt':
+        os.system('cls')  # Windows safe "clear" without scrollback wipe
+    else:
+        print("\033[H", end="")  # Unix-like fallback
+        
+    log_ok("Logging test succeeded.")
 
 
 # Load environment variables
