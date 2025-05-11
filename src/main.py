@@ -142,10 +142,13 @@ async def on_ready():
     
     logtest()  # Test logging
 
+    time.sleep(0.5)
     log_ok(f"Logged in as {client.user}")
     await tree.sync(guild=guilds[0])
     log_ok(f"Slash commands synced to {GUILD_ID}")
+    time.sleep(0.5)
     log_failed("Ban Scienceboy from the server :(")
+    time.sleep(0.2)
     log_ok("Server is ready.")
 
 
