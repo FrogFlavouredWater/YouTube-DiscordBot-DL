@@ -71,7 +71,7 @@ logger.addHandler(consoleHandler)
 def soft_clear_terminal():
     # Soft-clear screen by printing enough lines to fill the visible terminal
     height, _ = shutil.get_terminal_size((80, 24))  # fallback size
-    print("\n" * height)
+    print("\n" * (height/2))
 
     # Now reset the cursor to top-left safely (Windows-compatible)
     if os.name == 'nt':
