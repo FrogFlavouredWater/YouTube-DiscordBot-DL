@@ -18,7 +18,6 @@ class PlayerHandler:
                 title="Now Playing",
                 description=message or filename,
                 color=0x1DB954,
-                song_name=message or filename,
                 queue_list="\n".join([s['title'] for s in self.queues[conn.guild.id]['queue'][1:]]) if conn.guild.id in self.queues else None,
                 song_queuer=str(queuer) if queuer else "Unknown"
             )
@@ -61,7 +60,6 @@ class PlayerHandler:
                     title=f"Added to queue ({len(self.queues[conn.guild.id]['queue'])-1})",
                     description=metadata['title'],
                     color=0x1DB954,
-                    song_name=metadata['title'],
                     queue_list=[],
                     song_queuer=invoker
                 )
@@ -77,7 +75,6 @@ class PlayerHandler:
             title="Now Playing",
             description=metadata['title'],
             color=0x1DB954,
-            song_name=metadata['title'],
             queue_list=[],
             song_queuer=invoker
         )

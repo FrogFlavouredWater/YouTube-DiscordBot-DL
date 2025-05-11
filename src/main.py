@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import discord
 from colorama import *
 import logging
@@ -23,12 +24,16 @@ logger.setLevel(logging.DEBUG)
 OK_STATUS = f"[{Fore.GREEN}OK{Style.RESET_ALL}]"
 FAILED_STATUS = f"[{Fore.RED}FAILED{Style.RESET_ALL}]"
 
+
 def log_ok(msg):
     logger.log(logging.INFO, f"{OK_STATUS} {msg}", extra={"no_level": True})
 
+
 def log_failed(msg):
-    logger.log(logging.ERROR, f"{FAILED_STATUS} {msg}", extra={"no_level": True})
-    
+    logger.log(logging.ERROR, f"{FAILED_STATUS} {msg}", extra={
+               "no_level": True})
+
+
 class ColorFormatter(logging.Formatter):
     COLORS = {
         logging.DEBUG: Fore.CYAN,
@@ -50,6 +55,7 @@ class ColorFormatter(logging.Formatter):
         record.levelname = levelname
         return super().format(record)
 
+
 logFormatter = ColorFormatter("[%(levelname)s] :: %(message)s")
 
 # Setup handler
@@ -61,23 +67,34 @@ logger.addHandler(consoleHandler)
 
 # Test
 
+
 def logtest():
     print("Testing logging... \n\n")
-    
+
     logger.debug('debug message')
     logger.info('info message')
     logger.warning('warn message')
     logger.error('error message')
     logger.critical('critical message')
     print("\n")
-    
+
     log_ok('This is an OK message')
     log_failed('This is a FAILED message')
-    
+
     print("\n\nTesting logging complete.")
     print("========================================\n\n")
-    
+
     log_ok("Logging test succeeded.")
+
+    # Pause for 2 seconds
+    time.sleep(2)
+
+    # Scroll down by printing newlines to push content up
+    print("\n" * 50)
+
+    # Move cursor to top-left (optional: if you want to print new content immediately at top)
+    print("\033[H", end="")
+
 
 # Load environment variables
 load_dotenv()
@@ -96,15 +113,17 @@ player = PlayerHandler(client)
 downloader = DownloaderHandler(client, player)
 musichandler = MusicCommands(tree, guilds, downloader)
 
+
 @client.event
 async def on_ready():
     print(f"✅ Logged in as {client.user}")
     await tree.sync(guild=guilds[0])
     print(f"✅ Slash commands synced to guild {GUILD_ID}")
-    
+
     logtest()  # Test logging
-    
+
     log_ok("Server is ready.")
+
 
 @client.event
 async def on_voice_state_update(member, before, after):
@@ -127,6 +146,7 @@ async def on_voice_state_update(member, before, after):
             await player.disconnect(force=False)
             player.queues.pop(before.channel.guild.id, None)
 
+
 def main():
     # Optional: initial cleanup
     try:
@@ -138,6 +158,7 @@ def main():
         print(f"Failed to clean up orphaned files: {e}")
 
     client.run(TOKEN)
+
 
 if __name__ == "__main__":
     try:
