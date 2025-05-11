@@ -68,6 +68,16 @@ logger.addHandler(consoleHandler)
 
 # Test
 
+def soft_clear_terminal():
+    # Soft-clear screen by printing enough lines to fill the visible terminal
+    height, _ = shutil.get_terminal_size((80, 24))  # fallback size
+    print("\n" * height)
+
+    # Now reset the cursor to top-left safely (Windows-compatible)
+    if os.name == 'nt':
+        os.system('cls')  # Windows safe "clear" without scrollback wipe
+    else:
+        print("\033[H", end="")  # Unix-like fallback   
 
 def logtest():
     print("Testing logging... \n\n")
@@ -88,9 +98,7 @@ def logtest():
      # Pause for 2 seconds
     time.sleep(2)
     
-    # Soft-clear screen by printing enough lines to fill the visible terminal
-    height, _ = shutil.get_terminal_size((80, 24))  # fallback size
-    print("\n" * height)
+    soft_clear_terminal()
 
     # Now reset the cursor to top-left safely (Windows-compatible)
     if os.name == 'nt':
@@ -122,11 +130,13 @@ musichandler = MusicCommands(tree, guilds, downloader)
 @client.event
 async def on_ready():
     print(f"✅ Logged in as {client.user}")
-    await tree.sync(guild=guilds[0])
-    print(f"✅ Slash commands synced to guild {GUILD_ID}")
-
+    soft_clear_terminal()
+    
     logtest()  # Test logging
 
+    await tree.sync(guild=guilds[0])
+    log_ok(f"Slash commands synced to {GUILD_ID}")
+    
     log_ok("Server is ready.")
 
 
