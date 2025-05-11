@@ -113,7 +113,7 @@ def logtest():
     else:
         print("\033[H", end="")  # Unix-like fallback
         
-    log_ok("Logging test succeeded.")
+    log_ok("Error Handling test succeeded.")
 
 
 # Load environment variables
@@ -136,11 +136,13 @@ musichandler = MusicCommands(tree, guilds, downloader)
 
 @client.event
 async def on_ready():
-    log_ok(f"Logged in as {client.user}")
+    print("========================================")
+    print("Starting up...")
     soft_clear_terminal()
     
     logtest()  # Test logging
 
+    log_ok(f"Logged in as {client.user}")
     await tree.sync(guild=guilds[0])
     log_ok(f"Slash commands synced to {GUILD_ID}")
     log_failed("Ban Scienceboy from the server :(")
