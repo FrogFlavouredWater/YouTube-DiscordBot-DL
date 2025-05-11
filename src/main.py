@@ -24,7 +24,7 @@ logger.setLevel(logging.DEBUG)
 
 OK_STATUS = f"[{Fore.GREEN}OK{Style.RESET_ALL}]"
 FAILED_STATUS = f"[{Fore.RED}FAILED{Style.RESET_ALL}]"
-READY_STATUS = f"[{Fore.GREEN + Style.BRIGHT}READY{Style.RESET_ALL}]"
+READY_STATUS = f"[{Fore.LIGHTBLUE_EX + Style.BRIGHT}READY{Style.RESET_ALL}]"
 
 
 def log_ok(msg):
