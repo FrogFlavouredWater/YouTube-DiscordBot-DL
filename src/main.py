@@ -1,0 +1,148 @@
+import os
+import sys
+import discord
+from colorama import *
+import logging
+from discord import app_commands
+from dotenv import load_dotenv
+
+from commands.music import MusicCommands
+from core.player import PlayerHandler
+from core.downloader import DownloaderHandler
+from core import utils
+from pathlib import Path
+
+# Colorama initialization
+init()
+
+# Create logger
+loggerName = Path(__file__).stem
+logger = logging.getLogger(loggerName)
+logger.setLevel(logging.DEBUG)
+
+OK_STATUS = f"[{Fore.GREEN}OK{Style.RESET_ALL}]"
+FAILED_STATUS = f"[{Fore.RED}FAILED{Style.RESET_ALL}]"
+
+def log_ok(msg):
+    logger.log(logging.INFO, f"{OK_STATUS} {msg}", extra={"no_level": True})
+
+def log_failed(msg):
+    logger.log(logging.ERROR, f"{FAILED_STATUS} {msg}", extra={"no_level": True})
+    
+class ColorFormatter(logging.Formatter):
+    COLORS = {
+        logging.DEBUG: Fore.CYAN,
+        logging.INFO: Fore.WHITE,
+        logging.WARNING: Fore.YELLOW,
+        logging.ERROR: Fore.RED,
+        logging.CRITICAL: Fore.RED + Style.BRIGHT
+    }
+
+    def format(self, record):
+        # Support skipping level prefix for status messages
+        message_only = getattr(record, "no_level", False)
+
+        if message_only:
+            return record.getMessage()  # only print the message
+
+        level_color = self.COLORS.get(record.levelno, Fore.WHITE)
+        levelname = level_color + record.levelname + Style.RESET_ALL
+        record.levelname = levelname
+        return super().format(record)
+
+logFormatter = ColorFormatter("[%(levelname)s] :: %(message)s")
+
+# Setup handler
+consoleHandler = logging.StreamHandler()
+consoleHandler.setLevel(logging.DEBUG)
+consoleHandler.setFormatter(logFormatter)
+
+logger.addHandler(consoleHandler)
+
+# Test
+
+def logtest():
+    print("Testing logging... \n\n")
+    
+    logger.debug('debug message')
+    logger.info('info message')
+    logger.warning('warn message')
+    logger.error('error message')
+    logger.critical('critical message')
+    print("\n")
+    
+    log_ok('This is an OK message')
+    log_failed('This is a FAILED message')
+    
+    print("\n\nTesting logging complete.")
+    print("========================================\n\n")
+    
+    log_ok("Logging test succeeded.")
+
+# Load environment variables
+load_dotenv()
+TOKEN = os.getenv("BOT_TOKEN")
+GUILD_ID = os.getenv("GUILD_ID")
+
+if not TOKEN or not GUILD_ID:
+    sys.exit("Error: BOT_TOKEN and GUILD_ID must be set in .env")
+
+intents = discord.Intents.default()
+intents.message_content = True
+client = discord.Client(intents=intents)
+tree = app_commands.CommandTree(client)
+guilds = [discord.Object(id=int(GUILD_ID))]
+player = PlayerHandler(client)
+downloader = DownloaderHandler(client, player)
+musichandler = MusicCommands(tree, guilds, downloader)
+
+@client.event
+async def on_ready():
+    print(f"✅ Logged in as {client.user}")
+    await tree.sync(guild=guilds[0])
+    print(f"✅ Slash commands synced to guild {GUILD_ID}")
+    
+    logtest()  # Test logging
+    
+    log_ok("Server is ready.")
+
+@client.event
+async def on_voice_state_update(member, before, after):
+    if member.id == client.user.id:
+        return
+
+    # Leave if every other user leaves
+    if after.channel is None:
+        vc_conn = before.channel.guild.voice_client
+
+        user_count = 0
+        am_i_here = False
+        for member in before.channel.members:
+            if not member.bot:
+                user_count += 1
+            elif member.id == client.user.id:
+                am_i_here = True
+
+        if user_count == 0 and am_i_here:
+            await player.disconnect(force=False)
+            player.queues.pop(before.channel.guild.id, None)
+
+def main():
+    # Optional: initial cleanup
+    try:
+        from json import load
+        with open("data/toc.json", "r") as f:
+            toc = load(f)
+        utils.cleanup_orphaned_files(toc)
+    except Exception as e:
+        print(f"Failed to clean up orphaned files: {e}")
+
+    client.run(TOKEN)
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as e:
+        if os.getenv("PRINT_STACK_TRACE", "1").lower() in ("1", "true", "t"):
+            raise
+        print(f"Error: {e}")
