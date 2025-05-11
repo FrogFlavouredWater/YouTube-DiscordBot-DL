@@ -28,14 +28,13 @@ READY_STATUS = f"[{Fore.BLUE}READY{Style.RESET_ALL}]"
 
 
 def log_ok(msg):
-    logger.log(logging.INFO, f"{OK_STATUS} {msg}", extra={"no_level": True})
-
+    logger.log(logging.INFO, f"{OK_STATUS} {msg}\n", extra={"no_level": True})
 
 def log_failed(msg):
-    logger.log(logging.ERROR, f"{FAILED_STATUS} {msg}", extra={"no_level": True})
+    logger.log(logging.ERROR, f"{FAILED_STATUS} {msg}\n", extra={"no_level": True})
 
 def log_ready(msg):
-    logger.log(logging.INFO, f"{READY_STATUS} {msg}", extra={"no_level": True})
+    logger.log(logging.INFO, f"{READY_STATUS} {msg}\n", extra={"no_level": True})
 
 class ColorFormatter(logging.Formatter):
     COLORS = {
@@ -47,16 +46,17 @@ class ColorFormatter(logging.Formatter):
     }
 
     def format(self, record):
-        # Support skipping level prefix for status messages
         message_only = getattr(record, "no_level", False)
 
         if message_only:
-            return record.getMessage()  # only print the message
+            return record.getMessage().rstrip() + "\n"  # enforce newline
 
         level_color = self.COLORS.get(record.levelno, Fore.WHITE)
         levelname = level_color + record.levelname + Style.RESET_ALL
         record.levelname = levelname
-        return super().format(record)
+
+        base_message = super().format(record)
+        return base_message.rstrip() + "\n"  # enforce newline
 
 
 logFormatter = ColorFormatter("[%(levelname)s] :: %(message)s")
