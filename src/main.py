@@ -24,7 +24,7 @@ logger.setLevel(logging.DEBUG)
 
 OK_STATUS = f"[{Fore.GREEN}OK{Style.RESET_ALL}]"
 FAILED_STATUS = f"[{Fore.RED}FAILED{Style.RESET_ALL}]"
-READY_STATUS = f"[{Fore.LIGHTBLUE_EX + Style.BRIGHT}READY{Style.RESET_ALL}]"
+READY_STATUS = f"[{Fore.GREEN + Style.BRIGHT}READY{Style.RESET_ALL}]"
 
 
 def log_ok(msg):
@@ -35,7 +35,7 @@ def log_failed(msg):
     logger.log(logging.ERROR, f"{FAILED_STATUS} {msg}", extra={"no_level": True})
 
 def log_ready(msg):
-    logger.log(logging.INFO, f"{OK_STATUS} {msg}", extra={"no_level": True})
+    logger.log(logging.INFO, f"{READY_STATUS} {msg}", extra={"no_level": True})
 
 class ColorFormatter(logging.Formatter):
     COLORS = {
