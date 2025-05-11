@@ -45,22 +45,21 @@ class ColorFormatter(logging.Formatter):
         logging.CRITICAL: Fore.RED + Style.BRIGHT
     }
 
+    # Full ANSI reset code to clear all styles
+    ANSI_RESET = Style.RESET_ALL + "\033[0m"
+
     def format(self, record):
         message_only = getattr(record, "no_level", False)
-
-        # Always end with \r\n to force proper new line and cursor reset
-        suffix = "\r\n"
+        suffix = self.ANSI_RESET + "\n"  # Properly terminate with ANSI reset + newline
 
         if message_only:
             return record.getMessage().rstrip() + suffix
 
         level_color = self.COLORS.get(record.levelno, Fore.WHITE)
-        levelname = level_color + record.levelname + Style.RESET_ALL
-        record.levelname = levelname
+        record.levelname = level_color + record.levelname + self.ANSI_RESET
 
         base_message = super().format(record)
         return base_message.rstrip() + suffix
-
 
 
 logFormatter = ColorFormatter("[%(levelname)s] :: %(message)s")
