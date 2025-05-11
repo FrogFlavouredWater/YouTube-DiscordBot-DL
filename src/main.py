@@ -83,14 +83,21 @@ def logtest():
     print("Testing logging... \n\n")
 
     logger.debug('debug message')
+    time.sleep(0.5)
     logger.info('info message')
+    time.sleep(0.2)
     logger.warning('warn message')
+    time.sleep(0.1)
     logger.error('error message')
+    time.sleep(0.1)
     logger.critical('critical message')
     print("\n")
 
     log_ok('This is an OK message')
+    time.sleep(0.01)
     log_failed('This is a FAILED message')
+    
+    time.sleep(0.3)
 
     print("\n\nTesting logging complete.")
     print("========================================\n\n")
@@ -129,7 +136,7 @@ musichandler = MusicCommands(tree, guilds, downloader)
 
 @client.event
 async def on_ready():
-    print(f"✅ Logged in as {client.user}")
+    log_ok(f"Logged in as {client.user}")
     soft_clear_terminal()
     
     logtest()  # Test logging
