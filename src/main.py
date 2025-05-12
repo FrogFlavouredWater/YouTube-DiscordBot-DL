@@ -71,6 +71,21 @@ consoleHandler.setFormatter(logFormatter)
 
 logger.addHandler(consoleHandler)
 
+# Apply same formatter to discord.py internal loggers
+for logger_name in ("discord", "discord.client", "discord.gateway", "discord.voice_state"):
+    discord_logger = logging.getLogger(logger_name)
+    discord_logger.setLevel(logging.INFO)
+    
+    # Remove existing handlers to avoid duplicates
+    for handler in discord_logger.handlers[:]:
+        discord_logger.removeHandler(handler)
+
+    # Add our custom formatter
+    handler = logging.StreamHandler()
+    handler.setFormatter(logFormatter)
+    discord_logger.addHandler(handler)
+
+
 # Test
 
 def soft_clear_terminal():
