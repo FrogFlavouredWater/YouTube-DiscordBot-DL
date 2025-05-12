@@ -14,6 +14,9 @@ from core.downloader import DownloaderHandler
 from core import utils
 from pathlib import Path
 
+with open("logs/output.log", "a") as f:
+    f.truncate(0)
+
 # Colorama initialization
 init(strip=False, convert=False)
 
@@ -78,6 +81,8 @@ fileHandler.setFormatter(logFormatter)
 
 # Add it to your logger
 logger.addHandler(fileHandler)
+
+
 
 
 def soft_clear_terminal():
