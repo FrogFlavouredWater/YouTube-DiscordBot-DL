@@ -1,138 +1,16 @@
 import os
 import sys
 import time
-import shutil
 import discord
-from colorama import *
-import logging
 from discord import app_commands
 from dotenv import load_dotenv
+from pathlib import Path
 
 from commands.music import MusicCommands
 from core.player import PlayerHandler
 from core.downloader import DownloaderHandler
 from core import utils
-from pathlib import Path
-
-with open("logs/output.log", "a") as f:
-    f.truncate(0)
-
-# Colorama initialization
-init(strip=False, convert=False)
-
-# Create logger
-loggerName = Path(__file__).stem
-logger = logging.getLogger(loggerName)
-logger.setLevel(logging.DEBUG)
-
-OK_STATUS = f"[{Fore.GREEN}OK{Style.RESET_ALL}]"
-FAILED_STATUS = f"[{Fore.RED}FAILED{Style.RESET_ALL}]"
-READY_STATUS = f"[{Fore.BLUE}READY{Style.RESET_ALL}]"
-
-
-def log_ok(msg):
-    logger.log(logging.INFO, f"{OK_STATUS} {msg}\n", extra={"no_level": True})
-
-def log_failed(msg):
-    logger.log(logging.ERROR, f"{FAILED_STATUS} {msg}\n", extra={"no_level": True})
-
-def log_ready(msg):
-    logger.log(logging.INFO, f"{READY_STATUS} {msg}\n", extra={"no_level": True})
-
-class ColorFormatter(logging.Formatter):
-    COLORS = {
-        logging.DEBUG: Fore.CYAN,
-        logging.INFO: Fore.WHITE,
-        logging.WARNING: Fore.YELLOW,
-        logging.ERROR: Fore.RED,
-        logging.CRITICAL: Fore.RED + Style.BRIGHT
-    }
-
-    # Full ANSI reset code to clear all styles
-    ANSI_RESET = Style.RESET_ALL + "\033[0m"
-
-    def format(self, record):
-        message_only = getattr(record, "no_level", False)
-        suffix = self.ANSI_RESET + "\n"  # Properly terminate with ANSI reset + newline
-
-        if message_only:
-            return record.getMessage().rstrip() + suffix
-
-        level_color = self.COLORS.get(record.levelno, Fore.WHITE)
-        record.levelname = level_color + record.levelname + self.ANSI_RESET
-
-        base_message = super().format(record)
-        return base_message.rstrip() + suffix
-
-
-logFormatter = ColorFormatter("[%(levelname)s] :: %(message)s")
-
-# Setup handler
-consoleHandler = logging.StreamHandler()
-consoleHandler.setLevel(logging.DEBUG)
-consoleHandler.setFormatter(logFormatter)
-
-logger.addHandler(consoleHandler)
-
-# File handler that preserves ANSI color codes
-fileHandler = logging.FileHandler("logs/output.log", encoding="utf-8")
-fileHandler.setLevel(logging.DEBUG)
-fileHandler.setFormatter(logFormatter)
-
-# Add it to your logger
-logger.addHandler(fileHandler)
-
-
-
-
-def soft_clear_terminal():
-    # Soft-clear screen by printing enough lines to fill the visible terminal
-    height, _ = shutil.get_terminal_size((80, 24))  # fallback size
-    print("\n" * (height//2))
-
-    # Now reset the cursor to top-left safely (Windows-compatible)
-    if os.name == 'nt':
-        os.system('cls')  # Windows safe "clear" without scrollback wipe
-    else:
-        print("\033[H", end="")  # Unix-like fallback   
-
-def logtest():
-    logger.info("Current Time: " + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
-    logger.info("Testing logging...\n")
-
-    logger.debug('debug message')
-    time.sleep(0.5)
-    logger.info('info message')
-    time.sleep(0.2)
-    logger.warning('warn message')
-    time.sleep(0.1)
-    logger.error('error message')
-    time.sleep(0.1)
-    logger.critical('critical message')
-    print("\n")
-
-    log_ok('This is an OK message')
-    time.sleep(0.01)
-    log_failed('This is a FAILED message')
-    
-    time.sleep(0.3)
-
-    logger.info("Testing logging complete.")
-    logger.info("========================================")
-
-     # Pause for 2 seconds
-    time.sleep(2)
-    
-    soft_clear_terminal()
-
-    # Now reset the cursor to top-left safely (Windows-compatible)
-    if os.name == 'nt':
-        os.system('cls')  # Windows safe "clear" without scrollback wipe
-    else:
-        print("\033[H", end="")  # Unix-like fallback
-        
-    log_ok("Error Handling test succeeded.")
-
+from log_config import logger, log_ok, log_failed, log_ready, logtest, soft_clear_terminal
 
 # Load environment variables
 load_dotenv()
@@ -151,18 +29,16 @@ player = PlayerHandler(client)
 downloader = DownloaderHandler(client, player)
 musichandler = MusicCommands(tree, guilds, downloader)
 
-
 @client.event
 async def on_ready():
     logger.info("========================================")
     logger.info("Starting up...")
-
     time.sleep(0.5)
     soft_clear_terminal()
-    
-    logtest()  # Test logging
 
+    logtest()
     time.sleep(0.5)
+
     log_ok(f"Logged in as {client.user}")
     await tree.sync(guild=guilds[0])
     log_ok(f"Slash commands synced to {GUILD_ID}")
@@ -171,13 +47,11 @@ async def on_ready():
     time.sleep(0.2)
     log_ready("Server is ready.")
 
-
 @client.event
 async def on_voice_state_update(member, before, after):
     if member.id == client.user.id:
         return
 
-    # Leave if every other user leaves
     if after.channel is None:
         vc_conn = before.channel.guild.voice_client
 
@@ -193,19 +67,16 @@ async def on_voice_state_update(member, before, after):
             await player.disconnect(force=False)
             player.queues.pop(before.channel.guild.id, None)
 
-
 def main():
-    # Optional: initial cleanup
     try:
         from json import load
         with open("data/toc.json", "r") as f:
             toc = load(f)
         utils.cleanup_orphaned_files(toc)
     except Exception as e:
-        print(f"Failed to clean up orphaned files: {e}")
+        logger.error(f"Failed to clean up orphaned files: {e}")
 
     client.run(TOKEN)
-
 
 if __name__ == "__main__":
     try:
@@ -213,4 +84,4 @@ if __name__ == "__main__":
     except Exception as e:
         if os.getenv("PRINT_STACK_TRACE", "1").lower() in ("1", "true", "t"):
             raise
-        print(f"Error: {e}")
+        logger.error(f"Unhandled Exception: {e}")
