@@ -15,7 +15,7 @@ from core import utils
 from pathlib import Path
 
 # Colorama initialization
-init(strip=False, convert=False, autoreset=True)
+init(strip=False, convert=False)
 
 # Create logger
 loggerName = Path(__file__).stem
@@ -71,18 +71,14 @@ consoleHandler.setFormatter(logFormatter)
 
 logger.addHandler(consoleHandler)
 
-# Reuse your existing consoleHandler with ColorFormatter
-for logger_name in ("discord", "discord.client", "discord.gateway", "discord.voice_state"):
-    discord_logger = logging.getLogger(logger_name)
-    discord_logger.setLevel(logging.DEBUG)
+# File handler that preserves ANSI color codes
+fileHandler = logging.FileHandler("../logs/output.log", encoding="utf-8")
+fileHandler.setLevel(logging.DEBUG)
+fileHandler.setFormatter(logFormatter)
 
-    # Clear any pre-existing handlers
-    discord_logger.handlers.clear()
+# Add it to your logger
+logger.addHandler(fileHandler)
 
-    # Reuse the same console handler (already has your formatter)
-    discord_logger.addHandler(consoleHandler)
-
-# Test
 
 def soft_clear_terminal():
     # Soft-clear screen by printing enough lines to fill the visible terminal

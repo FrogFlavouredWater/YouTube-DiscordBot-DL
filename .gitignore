@@ -12,7 +12,8 @@
 /env
 /env.bak
 /venv.bak
-/data
+/data/*/*
+/data/toc.json
 /target
 __pycache__/
 *.py[cod]
@@ -23,3 +24,4 @@ __pycache__/
 .Python
 *.log
 *.tmp
+/logs/*
