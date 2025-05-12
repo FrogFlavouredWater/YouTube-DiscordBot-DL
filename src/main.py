@@ -6,11 +6,14 @@ from discord import app_commands
 from dotenv import load_dotenv
 from pathlib import Path
 
+from core import file_check
+file_check.verify_file_integrity()
+
 from commands.music import MusicCommands
 from core.player import PlayerHandler
 from core.downloader import DownloaderHandler
+from core.log_config import logger, log_ok, log_failed, log_ready, logtest, soft_clear_terminal
 from core import utils
-from log_config import logger, log_ok, log_failed, log_ready, logtest, soft_clear_terminal
 
 # Load environment variables
 load_dotenv()
