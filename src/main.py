@@ -15,7 +15,7 @@ from core import utils
 from pathlib import Path
 
 # Colorama initialization
-init(strip=False, convert=False)
+init(strip=False, convert=False, autoreset=True)
 
 # Create logger
 loggerName = Path(__file__).stem
@@ -71,20 +71,16 @@ consoleHandler.setFormatter(logFormatter)
 
 logger.addHandler(consoleHandler)
 
-# Apply same formatter to discord.py internal loggers
+# Reuse your existing consoleHandler with ColorFormatter
 for logger_name in ("discord", "discord.client", "discord.gateway", "discord.voice_state"):
     discord_logger = logging.getLogger(logger_name)
-    discord_logger.setLevel(logging.INFO)
-    
-    # Remove existing handlers to avoid duplicates
-    for handler in discord_logger.handlers[:]:
-        discord_logger.removeHandler(handler)
+    discord_logger.setLevel(logging.DEBUG)
 
-    # Add our custom formatter
-    handler = logging.StreamHandler()
-    handler.setFormatter(logFormatter)
-    discord_logger.addHandler(handler)
+    # Clear any pre-existing handlers
+    discord_logger.handlers.clear()
 
+    # Reuse the same console handler (already has your formatter)
+    discord_logger.addHandler(consoleHandler)
 
 # Test
 
