@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 import discord
 
-def create_embed(title, description, color, queue_list, song_queuer, song_name=None):
+def create_embed(title, description, color, queue_list=[], song_queuer=None, song_name=None):
     embed = discord.Embed(
         title=title,
         description=description,
@@ -27,7 +27,6 @@ def create_embed(title, description, color, queue_list, song_queuer, song_name=N
             inline=False
         )
 
-    embed.set_footer(text="Requested via /play")
     return embed
 
 def cleanup_orphaned_files(toc):

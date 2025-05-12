@@ -9,8 +9,12 @@ from colorama import init, Fore, Style
 # Ensure logs directory exists
 Path("logs").mkdir(parents=True, exist_ok=True)
 
-# Clear old log
+# Clear custom log file
 with open("logs/output.log", "w", encoding="utf-8") as f:
+    f.truncate(0)
+
+# Clear Discord log file
+with open("logs/discordoutput.log", "w", encoding="utf-8") as f:
     f.truncate(0)
 
 # Colorama setup
@@ -44,7 +48,7 @@ class ColorFormatter(logging.Formatter):
 # Formatter instance
 logFormatter = ColorFormatter("[%(levelname)s] :: %(message)s")
 
-# Create and configure logger
+# Create and configure main bot logger
 logger = logging.getLogger("bot")
 logger.setLevel(logging.DEBUG)
 
@@ -54,19 +58,23 @@ consoleHandler.setLevel(logging.DEBUG)
 consoleHandler.setFormatter(logFormatter)
 logger.addHandler(consoleHandler)
 
-# File handler
+# File handler for custom logs
 fileHandler = logging.FileHandler("logs/output.log", encoding="utf-8")
 fileHandler.setLevel(logging.DEBUG)
 fileHandler.setFormatter(logFormatter)
 logger.addHandler(fileHandler)
 
-# Hook Discord's loggers
+# File handler for Discord logs only (no color formatter)
+discordFileHandler = logging.FileHandler("logs/discordoutput.log", encoding="utf-8")
+discordFileHandler.setLevel(logging.DEBUG)
+discordFileHandler.setFormatter(logging.Formatter("[%(levelname)s] :: %(message)s"))
+
+# Hook Discord's loggers separately (file only)
 for name in ("discord", "discord.client", "discord.gateway", "discord.voice_state"):
     discord_logger = logging.getLogger(name)
-    discord_logger.setLevel(logging.DEBUG)
+    discord_logger.setLevel(logging.INFO)
     discord_logger.handlers.clear()
-    discord_logger.addHandler(consoleHandler)
-    discord_logger.addHandler(fileHandler)
+    discord_logger.addHandler(discordFileHandler)
 
 # Shortcut functions for special tags
 OK_STATUS = f"[{Fore.GREEN}OK{Style.RESET_ALL}]"
