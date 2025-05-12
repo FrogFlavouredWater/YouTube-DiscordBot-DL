@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 import discord
 
-def create_embed(title, description, color, song_name, queue_list, song_queuer):
+def create_embed(title, description, color, queue_list, song_queuer, song_name=None):
     embed = discord.Embed(
         title=title,
         description=description,
