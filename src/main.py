@@ -72,7 +72,7 @@ consoleHandler.setFormatter(logFormatter)
 logger.addHandler(consoleHandler)
 
 # File handler that preserves ANSI color codes
-fileHandler = logging.FileHandler("../logs/output.log", encoding="utf-8")
+fileHandler = logging.FileHandler("logs/output.log", encoding="utf-8")
 fileHandler.setLevel(logging.DEBUG)
 fileHandler.setFormatter(logFormatter)
 
@@ -92,6 +92,7 @@ def soft_clear_terminal():
         print("\033[H", end="")  # Unix-like fallback   
 
 def logtest():
+    logger.info("Current Time: " + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
     logger.info("Testing logging...\n")
 
     logger.debug('debug message')
