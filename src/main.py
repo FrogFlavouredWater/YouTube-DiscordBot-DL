@@ -39,7 +39,7 @@ async def on_ready():
     time.sleep(0.5)
     soft_clear_terminal()
 
-    logtest()
+    # logtest()
     time.sleep(0.5)
 
     log_ok(f"Logged in as {client.user}")
