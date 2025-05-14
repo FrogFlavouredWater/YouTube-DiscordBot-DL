@@ -80,6 +80,7 @@ def main():
         logger.error(f"Failed to clean up orphaned files: {e}")
 
     client.run(TOKEN)
+    
 
 if __name__ == "__main__":
     try:

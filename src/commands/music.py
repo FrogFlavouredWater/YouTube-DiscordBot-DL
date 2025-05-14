@@ -199,6 +199,60 @@ class MusicCommands():
 
             return result[:25] if len(result) > 25 else result
         
+        @tree.command(name="createjb", description="Add a jukebox entry", guilds=guilds)
+        @app_commands.describe(link="The video or audio link", filename="The filename to save as (with .opus extension)")
+        async def createjb(interaction: discord.Interaction, link: str, filename: str):
+            vc_conn = await self.player.connect_and_prepare(interaction)
+            if not vc_conn:
+                return
+
+            service, match = self.downloader.match_service_and_id(link)
+            if not (service and match):
+                await interaction.response.send_message("Invalid URL or unsupported service.", ephemeral=True)
+                return
+
+            # Download to data/jukebox/filename
+            import yt_dlp
+            import time
+
+            jukebox_path = f"data/jukebox/{filename}"
+            ydl_opts = {
+                'outtmpl': jukebox_path,
+                'format': 'bestaudio/best',
+                'noplaylist': True,
+                'max-filesize': "25M",
+                'postprocessors': [{
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'opus',
+                    'preferredquality': '192',
+                }],
+            }
+
+            await interaction.response.defer(ephemeral=True)
+            try:
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    info = ydl.extract_info(link, download=True)
+            except Exception as e:
+                await interaction.followup.send(f"Download failed: {e}", ephemeral=True)
+                return
+
+            # Add to jukebox index (optional: you can skip this if not needed)
+            metadata = {
+                'title': filename,
+                'file': jukebox_path.replace("\\", "/"),
+                'service': 'Jukebox',
+                'duration': info.get('duration', 0),
+                'timestamp': round(time.time())
+            }
+            # Optionally, you could update a jukebox TOC here
+
+            embed = self.player.add_to_queue(
+                metadata=metadata,
+                conn=vc_conn,
+                invoker=interaction.user.name
+            )
+            await interaction.followup.send(f"Downloaded and added `{filename}` to the jukebox!", embed=embed, ephemeral=True)
+        
         @tree.command(name="add", description="Add a YouTube or SoundCloud URL to the queue", guilds=guilds)
         @app_commands.describe(link="The video or audio link")
         async def add(interaction: discord.Interaction, link: str):
